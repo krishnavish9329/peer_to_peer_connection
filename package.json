@@ -4,10 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node server.js",
-    "dev1": "next dev",
+    "dev": "next dev",
     "build": "next build",
-    "start": "node server.js"
+    "start": "next start"
   },
   "dependencies": {
     "next": "16.2.7",
