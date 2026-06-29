@@ -10,6 +10,7 @@ export default function useWebSocket(roomId) {
   const [peerId, setPeerId] = useState("");
   const [peers, setPeers] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [privateMessages, setPrivateMessages] = useState([]);
 
   useEffect(() => {
     const ws = new WebSocket(SOCKET_URL);
@@ -52,6 +53,10 @@ export default function useWebSocket(roomId) {
           setMessages((prev) => [...prev, msg]);
           break;
 
+        case "private-message":
+          setPrivateMessages(prev => [...prev, msg]);
+          break;
+
         default:
           console.log(msg);
       }
@@ -84,11 +89,38 @@ export default function useWebSocket(roomId) {
       },
     ]);
   };
+  const sendPrivateMessage = (toPeerId, message) => {
+    if (!socket.current || socket.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+    socket.current.send(
+      JSON.stringify({
+        type: "private-message",
+        toPeerId: toPeerId,
+        message: message,
+      }),
+      // Add sender's own message locally
+      setPrivateMessages((prev) => [
+        ...prev,
+        {
+          type: "private-message",
+          fromPeerId: peerId,
+          toPeerId,
+          message,
+          timestamp: Date.now(),
+          self: true,
+        },
+      ])
+    );
+  console.log("send message to ", toPeerId, "the Message is ", message)
+};
 
-  return {
-    peerId,
-    peers,
-    messages,
-    sendMessage,
-  };
+return {
+  peerId,
+  peers,
+  messages,
+  privateMessages,
+  sendMessage,
+  sendPrivateMessage,
+};
 }
